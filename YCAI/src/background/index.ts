@@ -109,7 +109,7 @@ const getMessageHandler = <
     // keypair
     case Messages.GenerateKeypair.value:
       return pipe(
-        settings.generatePublicKeypair(''),
+        settings.generatePublicKeypair('my-name'),
         TE.mapLeft(toMessageHandlerError)
       );
     case Messages.DeleteKeypair.value:
@@ -246,7 +246,7 @@ bo.runtime.onInstalled.addListener((details) => {
     // launch install message
     void pipe(
       sequenceS(TE.ApplicativePar)({
-        keypair: settings.generatePublicKeypair(''),
+        keypair: settings.generatePublicKeypair('Alice'),
         profile: db.update(Messages.UpdateContentCreator.value, null),
         settings: db.update(
           Messages.UpdateSettings.value,
@@ -269,7 +269,7 @@ bo.runtime.onInstalled.addListener((details) => {
               | Messages.Messages['GetKeypair']['Response']
             > =>
               r === null
-                ? settings.generatePublicKeypair('')
+                ? settings.generatePublicKeypair('Alice')
                 : TE.right({ type: Messages.GetKeypair.value, response: r })
           )
         ),
