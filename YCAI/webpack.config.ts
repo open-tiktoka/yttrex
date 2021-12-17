@@ -16,6 +16,13 @@ const { buildENV, ...config } = getConfig({
   entry: {
     dashboard: path.resolve(__dirname, 'src/dashboard.tsx'),
   },
+  fallback: {
+    crypto: require.resolve('crypto-browserify'),
+    stream: require.resolve('stream-browserify'),
+    path: require.resolve('path-browserify'),
+    fs: require.resolve('browserify-fs'),
+    util: require.resolve('node-util'),
+  },
 });
 
 config.plugins.push(

@@ -46,6 +46,7 @@ interface GetConfigParams<E extends t.Props> {
     [key: string]: string;
   };
   hot: boolean;
+  fallback?: any;
 }
 
 const getConfig = <E extends t.Props>(
@@ -199,6 +200,7 @@ const getConfig = <E extends t.Props>(
           configFile: path.resolve(opts.cwd, "./tsconfig.json"),
         }),
       ],
+      fallback: opts.fallback ?? {},
     },
 
     plugins,
