@@ -1,5 +1,5 @@
 import * as E from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { Keypair } from '../models/Settings';
 import { GetLogger } from '@shared/logger';
@@ -50,10 +50,32 @@ const makeToken = (
   const keys = JSON.stringify({ secretKey });
   const data = JSON.stringify({ date });
   const contract = `Scenario 'ecdh': Encrypt a message with a password/secret
-      Given that I have a 'string' named 'password'
-      and that I have a 'string' named 'message'
-      When I encrypt the secret message 'message' with 'password'
-      Then print the 'secret message'`;
+Given that I have a 'string' named 'password'
+and that I have a 'string' named 'message'
+When I encrypt the secret message 'message' with 'password'
+Then print the 'secret message'`;
+
+  return pipe(
+    TE.tryCatch(() => zencode_exec(contract, { data, keys, conf }), E.toError),
+    TE.map((r) => {
+      zrLogger.debug(`Make token result: %O`, r);
+      return r.result;
+    })
+  );
+};
+
+const makeSignature = (
+  payload: any,
+  secretKey: string
+): TE.TaskEither<Error, string> => {
+  const contract = `Scenario 'ecdh': create the signature of an object
+Given that I have a 'string' named 'secretKey'
+Given that I have a 'string' named 'message'
+When I create the signature of 'message'
+Then print 'message.signature'`;
+
+  const data = JSON.stringify({});
+  const keys = JSON.stringify({ secretKey })
 
   return pipe(
     TE.tryCatch(() => zencode_exec(contract, { data, keys, conf }), E.toError),
@@ -67,5 +89,5 @@ const makeToken = (
 export const security: SecurityProvider = {
   makeKeypair,
   makeToken,
-  makeSignature: () => E.left({ message: 'Not implemented ' }),
+  makeSignature,
 };

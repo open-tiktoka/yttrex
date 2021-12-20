@@ -1,6 +1,5 @@
 import * as bs58 from 'bs58';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as E from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/lib/TaskEither';
 import nacl from 'tweetnacl';
 import { Keypair } from '../models/Settings';
@@ -59,12 +58,13 @@ const makeToken = (
 const makeSignature = (
   payload: any,
   secretKey: string
-): E.Either<chrome.runtime.LastError, string> => {
+): TE.TaskEither<chrome.runtime.LastError, string> => {
   const signature = nacl.sign.detached(
     decodeString(JSON.stringify(payload)),
     decodeKey(secretKey)
   );
-  return catchRuntimeLastError(bs58.encode(signature));
+
+  return TE.fromEither(catchRuntimeLastError(bs58.encode(signature)));
 };
 
 const security: SecurityProvider = {

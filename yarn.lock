@@ -3210,7 +3210,7 @@ __metadata:
     webpack-bundle-analyzer: ^4.5.0
     webpack-cli: ^4.9.1
     webpack-dev-server: ^4.6.0
-    zenroom: ^2.2.2
+    zenroom: latest
   languageName: unknown
   linkType: soft
 
@@ -14465,6 +14465,7 @@ __metadata:
     lint-staged: ^12.1.2
     ts-jest: ^27.1.1
     typescript: ^4.5.4
+    zenroom: latest
   languageName: unknown
   linkType: soft
 
@@ -17610,10 +17611,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"zenroom@npm:^2.2.2":
-  version: 2.2.2
-  resolution: "zenroom@npm:2.2.2"
-  checksum: 5877254e933d28b094231cf6115b4436b9bee54cd4e575ee970f15e6e84ab395ed437a872f561aec3d039df7fba905102ecf61aafd57104cc72dd8142c29a9ee
+"zenroom@npm:latest":
+  version: 2.2.3
+  resolution: "zenroom@npm:2.2.3"
+  checksum: b252efbbfa5eceb80dce8c99cb81b665ebf7ac1d8e9c6f4612c9a495ab1c3d3dcad1bcd4f8c5ff17a6ea20e334e6a70d0e2a5dbb6ef30360c49f1f8c21846ad9
   languageName: node
   linkType: hard
 

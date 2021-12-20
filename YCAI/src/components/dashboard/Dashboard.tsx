@@ -19,10 +19,6 @@ import { LabVideoEdit } from './lab/LabVideoEdit';
 import { ContentCreator } from '@shared/models/ContentCreator';
 import { AuthResponse } from '@shared/models/Auth';
 
-import { makeKeypair } from '../../providers/zenroom.provider';
-
-void makeKeypair('skjfdhdsk')();
-
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: 0,

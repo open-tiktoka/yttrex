@@ -13,7 +13,7 @@ import { config } from '../config';
 import { Keypair, Settings } from '../models/Settings';
 import { GetLogger } from '@shared/logger';
 import { sendAPIMessage } from './browser.provider';
-import security from './bs58.provider';
+import { security } from './zenroom.provider';
 
 const ddLogger = GetLogger('data-donation');
 
@@ -486,7 +486,6 @@ const flush = (keypair: Keypair): void => {
 
     void pipe(
       security.makeSignature(state.content, keypair.secretKey),
-      TE.fromEither,
       TE.chain((signature) =>
         sendAPIMessage(Endpoints.v2.Public.AddEvents)({
           Headers: {

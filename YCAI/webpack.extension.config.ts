@@ -23,7 +23,13 @@ const { buildENV, ...config } = getConfig({
     popup: path.resolve(__dirname, 'src/popup.tsx'),
     background: path.resolve(__dirname, 'src/background/index.ts'),
   },
-  fallback: { crypto: require.resolve('crypto-browserify') },
+  fallback: {
+    crypto: require.resolve('crypto-browserify'),
+    stream: require.resolve('stream-browserify'),
+    path: require.resolve('path-browserify'),
+    fs: require.resolve('browserify-fs'),
+    util: require.resolve('node-util'),
+  },
 });
 
 config.devtool = config.mode === 'development' ? 'inline-source-map' : false;

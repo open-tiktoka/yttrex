@@ -1,6 +1,5 @@
 import * as TE from 'fp-ts/lib/TaskEither';
 import { Keypair } from 'models/Settings';
-import * as E from 'fp-ts/lib/Either';
 
 export interface SecurityProvider {
   makeKeypair: (
@@ -13,5 +12,5 @@ export interface SecurityProvider {
   makeSignature: (
     payload: any,
     secretKey: string
-  ) => E.Either<chrome.runtime.LastError, string>;
+  ) => TE.TaskEither<chrome.runtime.LastError, string>;
 }

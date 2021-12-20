@@ -42,5 +42,8 @@
     "**/src/**": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "zenroom": "latest"
   }
 }
