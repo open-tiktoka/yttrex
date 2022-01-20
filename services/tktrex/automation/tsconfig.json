@@ -1,0 +1,35 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": "./src",
+    "esModuleInterop": true,
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noImplicitAny": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "target": "es2015",
+    "paths": {
+      "@shared/*": ["../../../../packages/shared/src/*"],
+      "@tktrex/*": ["../../shared/src/*"],
+      "@guardoni/*": ["../../../../guardoni/src/*"]
+    }
+  },
+  "references": [
+    { "path": "../../../packages/shared" },
+    { "path": "../shared" },
+    { "path": "../../../guardoni" }
+  ],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"],
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "@trex/tt-automation",
+  "version": "0.2.5",
+  "packageManager": "yarn@3.1.1",
+  "scripts": {
+    "build": "NODE_ENV=production webpack",
+    "clean": "rm -Rf dist",
+    "automate:dev": "NODE_ENV=development ts-node ./src/index.ts",
+    "automate:prod": "NODE_ENV=production ts-node ./src/index.ts",
+    "automate": "node ./dist/index.js",
+    "tmp": "yarn automate:dev search-on-tiktok ~/work/French\\ Elections/tt-auto.csv --url https://tiktok.com/fr --profile ~/work/profiles/djfm-tt-fr-elections"
+  },
+  "main": "./dist/index.js",
+  "devDependencies": {
+    "@types/node": "^17.0.8",
+    "@types/webpack": "^5.28.0",
+    "@types/yargs": "^17.0.8",
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^8.4.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard-with-typescript": "^21.0.1",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "ts-loader": "^9.2.6",
+    "ts-node": "^10.4.0",
+    "tsconfig-paths": "^3.12.0",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "typescript": "^4.5.4",
+    "webpack": "^5.66.0",
+    "webpack-cli": "^4.9.1"
+  },
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/puppeteer": "^5.4.4",
+    "csv": "^6.0.5",
+    "dotenv": "^12.0.4",
+    "fp-ts": "^2.11.7",
+    "io-ts": "^2.2.16",
+    "puppeteer": "^13.0.1",
+    "yargs": "^17.3.1"
+  }
+}
