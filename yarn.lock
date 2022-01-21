@@ -1995,7 +1995,9 @@ __metadata:
     eslint-plugin-promise: ^5.2.0
     fp-ts: ^2.11.7
     io-ts: ^2.2.16
-    puppeteer: ^13.0.1
+    puppeteer: ^13.1.1
+    puppeteer-extra: ^3.2.3
+    puppeteer-extra-plugin-stealth: ^2.9.0
     ts-loader: ^9.2.6
     ts-node: ^10.4.0
     tsconfig-paths: ^3.12.0
@@ -18314,7 +18316,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer@npm:^13.0.1":
+"puppeteer@npm:^13.1.1":
   version: 13.1.1
   resolution: "puppeteer@npm:13.1.1"
   dependencies:

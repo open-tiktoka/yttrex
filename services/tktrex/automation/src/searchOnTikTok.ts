@@ -2,13 +2,17 @@
 
 import * as TE from 'fp-ts/lib/TaskEither';
 
-import puppeteer from 'puppeteer';
+import { Page } from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+import stealth from 'puppeteer-extra-plugin-stealth';
 
 import loadProfileState from './profileState';
 
 import { isLoggedIn } from './tikTokUtil';
 
 import { prompt, toError } from './util';
+
+puppeteer.use(stealth());
 
 export interface SearchOnTikTokOptions {
   chromePath: string;
@@ -22,7 +26,7 @@ export const searchOnTikTok = ({
   file,
   profile,
   url,
-}: SearchOnTikTokOptions): TE.TaskEither<Error, puppeteer.Page> =>
+}: SearchOnTikTokOptions): TE.TaskEither<Error, Page> =>
   TE.tryCatch(async() => {
     console.log(
       `launching chrome from "${chromePath}" with profile "${profile}"`,
