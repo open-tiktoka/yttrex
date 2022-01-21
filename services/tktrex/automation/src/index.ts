@@ -51,13 +51,13 @@ const menu = yargs(hideBin(process.argv))
         .option('url', {
           alias: 'u',
           demandOption: true,
-          desc: 'Url to make the search on (e.g. https://tiktok.com/fr)',
+          desc: 'Base URL to make the search on (e.g. https://tiktok.com/fr)',
           type: 'string',
         })
         .option('profile', {
           alias: 'p',
           demandOption: true,
-          desc: 'Profile to use for the search',
+          desc: 'Path to a profile to use for this search experiment',
           type: 'string',
         }),
     (args) => searchOnTikTokCommand(args),
