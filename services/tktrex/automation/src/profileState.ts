@@ -9,6 +9,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 const ProfileStateStorage = t.type(
   {
     ttExtensionInstalled: t.boolean,
+    nTimesUsed: t.number,
   },
   'ProfileStateStorage',
 );
@@ -16,13 +17,16 @@ type ProfileStateStorage = t.TypeOf<typeof ProfileStateStorage>;
 
 const initialProfileState: ProfileStateStorage = {
   ttExtensionInstalled: false,
+  nTimesUsed: 0,
 };
 
 export class ProfileState {
   constructor(
     private readonly path: string,
     private storage: ProfileStateStorage,
-  ) {}
+  ) {
+    this.storage.nTimesUsed += 1;
+  }
 
   isTTExtensionInstalled(): boolean {
     return this.storage.ttExtensionInstalled;
@@ -33,7 +37,11 @@ export class ProfileState {
     return this.save();
   }
 
-  private async save(): Promise<ProfileState> {
+  getNTimesUsed(): number {
+    return this.storage.nTimesUsed;
+  }
+
+  public async save(): Promise<ProfileState> {
     const json = JSON.stringify(this.storage, null, 2);
     await writeFile(this.path, json);
     return this;
@@ -43,7 +51,11 @@ export class ProfileState {
 const loadRawStorage = async(path: string): Promise<unknown> => {
   try {
     const json = await readFile(path, 'utf8');
-    return JSON.parse(json);
+    const data = JSON.parse(json);
+    return {
+      ...initialProfileState,
+      ...data,
+    };
   } catch (e) {
     return initialProfileState;
   }
@@ -58,7 +70,7 @@ export const loadProfileState = async(
   const state = ProfileStateStorage.decode(data);
 
   if (isRight(state)) {
-    return new ProfileState(path, state.right);
+    return new ProfileState(path, state.right).save();
   }
 
   throw new Error(PathReporter.report(state).join('\n'));

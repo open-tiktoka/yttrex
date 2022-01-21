@@ -28,8 +28,16 @@ export const searchOnTikTok = ({
   url,
 }: SearchOnTikTokOptions): TE.TaskEither<Error, Page> =>
   TE.tryCatch(async() => {
+    const profileState = await loadProfileState(profile);
+
     console.log(
-      `launching chrome from "${chromePath}" with profile "${profile}"`,
+      `launching chrome from "${
+        chromePath
+      }" with profile "${
+        profile
+      }", which has been used ${
+        profileState.getNTimesUsed() - 1
+      } times before`,
     );
 
     const options = {
@@ -48,7 +56,6 @@ export const searchOnTikTok = ({
     const page = await browser.newPage();
     await page.goto(url);
 
-    const profileState = await loadProfileState(profile);
 
     if (!profileState.isTTExtensionInstalled()) {
       await prompt('please install tiktok extension and press return');
