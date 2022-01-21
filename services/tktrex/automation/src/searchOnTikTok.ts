@@ -4,10 +4,11 @@ import * as TE from 'fp-ts/lib/TaskEither';
 
 import puppeteer from 'puppeteer';
 
-import {
-  sleep,
-  toError,
-} from './util';
+import loadProfileState from './profileState';
+
+import { isLoggedIn } from './tikTokUtil';
+
+import { prompt, toError } from './util';
 
 export interface SearchOnTikTokOptions {
   chromePath: string;
@@ -28,6 +29,10 @@ export const searchOnTikTok = ({
     );
 
     const options = {
+      defaultViewport: {
+        height: 1080,
+        width: 1920,
+      },
       executablePath: chromePath,
       headless: false,
       ignoreDefaultArgs: ['--disable-extensions'],
@@ -39,7 +44,20 @@ export const searchOnTikTok = ({
     const page = await browser.newPage();
     await page.goto(url);
 
-    await sleep(30000);
+    const profileState = await loadProfileState(profile);
+
+    if (!profileState.isTTExtensionInstalled()) {
+      await prompt('please install tiktok extension and press return');
+      await profileState.setTTExtensionInstalled(true);
+    }
+
+    let loggedIn = await isLoggedIn(page);
+
+    while (!loggedIn) {
+      console.log('please log in to TikTok');
+      loggedIn = await isLoggedIn(page);
+    }
+
     return page;
   }, toError);
 

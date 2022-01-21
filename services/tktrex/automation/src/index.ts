@@ -29,6 +29,10 @@ const searchOnTikTokCommand = async({
       url,
     })),
     TE.chain(searchOnTikTok),
+    TE.map(async(page) => {
+      console.log('done!');
+      await page.browser().close();
+    }),
     TE.mapLeft((e) => {
       console.error(e);
       process.exit(1);
