@@ -8,7 +8,6 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 
 const ProfileStateStorage = t.type(
   {
-    ttExtensionInstalled: t.boolean,
     nTimesUsed: t.number,
   },
   'ProfileStateStorage',
@@ -16,25 +15,15 @@ const ProfileStateStorage = t.type(
 type ProfileStateStorage = t.TypeOf<typeof ProfileStateStorage>;
 
 const initialProfileState: ProfileStateStorage = {
-  ttExtensionInstalled: false,
   nTimesUsed: 0,
 };
 
 export class ProfileState {
   constructor(
     private readonly path: string,
-    private storage: ProfileStateStorage,
+    private readonly storage: ProfileStateStorage,
   ) {
     this.storage.nTimesUsed += 1;
-  }
-
-  isTTExtensionInstalled(): boolean {
-    return this.storage.ttExtensionInstalled;
-  }
-
-  setTTExtensionInstalled(value = true): Promise<ProfileState> {
-    this.storage.ttExtensionInstalled = value;
-    return this.save();
   }
 
   getNTimesUsed(): number {

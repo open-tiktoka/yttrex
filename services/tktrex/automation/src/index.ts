@@ -14,16 +14,19 @@ const searchOnTikTokCommand = async({
   file,
   url,
   profile,
+  extensionSource,
 }: {
   file: string;
   url: string;
   profile: string;
+  extensionSource: string;
 }): Promise<void> => {
   void pipe(
     getChromePath(),
     TE.fromEither,
     TE.map((chromePath) => ({
       chromePath,
+      extensionSource,
       file,
       profile,
       url,
@@ -62,6 +65,12 @@ const menu = yargs(hideBin(process.argv))
           alias: 'p',
           demandOption: true,
           desc: 'Path to a profile to use for this search experiment',
+          type: 'string',
+        })
+        .option('extension-source', {
+          alias: 'e',
+          desc: 'Where to get the extension from (e.g. https://tiktok.tracking.exposed/ext.zip or ~/work/tk.zip)',
+          default: 'user-installed',
           type: 'string',
         }),
     (args) => searchOnTikTokCommand(args),

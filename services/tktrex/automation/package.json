@@ -8,11 +8,12 @@
     "automate:dev": "NODE_ENV=development ts-node ./src/index.ts",
     "automate:prod": "NODE_ENV=production ts-node ./src/index.ts",
     "automate": "node ./dist/index.js",
-    "tmp": "yarn automate:dev search-on-tiktok ~/work/French\\ Elections/tt-auto.csv --url https://tiktok.com/fr --profile ~/work/profiles/djfm-tt-fr-elections"
+    "tmp": "yarn automate:dev search-on-tiktok ~/work/French\\ Elections/tt-auto.csv --url https://tiktok.com/fr --profile /home/djfm/work/profiles/djfm-tt-fr-elections --extension-source ../extension/dist/tktrex-extension-0.2.6.zip"
   },
   "main": "./dist/index.js",
   "devDependencies": {
     "@types/node": "^17.0.8",
+    "@types/unzipper": "^0",
     "@types/webpack": "^5.28.0",
     "@types/yargs": "^17.0.8",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
@@ -32,15 +33,15 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
-    "@types/dotenv": "^8.2.0",
     "@types/puppeteer": "^5.4.4",
     "csv": "^6.0.5",
-    "dotenv": "^12.0.4",
     "fp-ts": "^2.11.7",
     "io-ts": "^2.2.16",
+    "node-fetch": "^2.6.5",
     "puppeteer": "^13.1.1",
     "puppeteer-extra": "^3.2.3",
     "puppeteer-extra-plugin-stealth": "^2.9.0",
+    "unzipper": "^0.10.11",
     "yargs": "^17.3.1"
   }
 }

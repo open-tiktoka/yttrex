@@ -5,7 +5,7 @@
     "baseUrl": "./src",
     "esModuleInterop": true,
     "jsx": "react",
-    "module": "esnext",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "noEmit": true,
     "noImplicitAny": true,
@@ -26,10 +26,7 @@
     { "path": "../../../guardoni" }
   ],
   "ts-node": {
-    "require": ["tsconfig-paths/register"],
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
+    "require": ["tsconfig-paths/register"]
   },
   "exclude": ["node_modules", "dist"]
 }

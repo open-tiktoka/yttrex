@@ -10,12 +10,13 @@ import loadProfileState from './profileState';
 
 import { isLoggedIn } from './tikTokUtil';
 
-import { prompt, toError } from './util';
+import { createExtensionDirectory, prompt, sleep, toError } from './util';
 
 puppeteer.use(stealth());
 
 export interface SearchOnTikTokOptions {
   chromePath: string;
+  extensionSource: string;
   file: string;
   url: string;
   profile: string;
@@ -23,6 +24,7 @@ export interface SearchOnTikTokOptions {
 
 export const searchOnTikTok = ({
   chromePath,
+  extensionSource,
   file,
   profile,
   url,
@@ -31,16 +33,26 @@ export const searchOnTikTok = ({
     const profileState = await loadProfileState(profile);
 
     console.log(
-      `launching chrome from "${
-        chromePath
-      }" with profile "${
-        profile
-      }", which has been used ${
+      `launching chrome from "${chromePath}" with profile "${profile}", which has been used ${
         profileState.getNTimesUsed() - 1
       } times before`,
     );
 
+    const extArgs =
+      extensionSource === 'user-provided'
+        ? []
+        : await (async() => {
+          const extPath = await createExtensionDirectory(extensionSource);
+          console.log(`extension path: ${extPath}`);
+
+          return [
+            `--load-extension=${extPath}`,
+            `--disable-extensions-except=${extPath}`,
+          ];
+        })();
+
     const options = {
+      args: ['--no-sandbox', '--disabled-setuid-sandbox', ...extArgs],
       defaultViewport: {
         height: 1080,
         width: 1920,
@@ -56,18 +68,20 @@ export const searchOnTikTok = ({
     const page = await browser.newPage();
     await page.goto(url);
 
-
-    if (!profileState.isTTExtensionInstalled()) {
-      await prompt('please install tiktok extension and press return');
-      await profileState.setTTExtensionInstalled(true);
-    }
-
     let loggedIn = await isLoggedIn(page);
+
+    if (extensionSource === 'user-provided') {
+      await prompt(
+        'please install the TikTok extension and press enter when done',
+      );
+    }
 
     while (!loggedIn) {
       console.log('please log in to TikTok');
       loggedIn = await isLoggedIn(page);
     }
+
+    await sleep(60000);
 
     return page;
   }, toError);

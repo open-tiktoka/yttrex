@@ -1,6 +1,17 @@
+import Crypto from 'crypto';
+
+import fs from 'fs';
+
+import { mkdir } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import readline from 'readline';
+import { URL } from 'url';
 
 import * as TE from 'fp-ts/lib/TaskEither';
+
+import fetch from 'node-fetch';
+import unzip from 'unzipper';
 
 export type TEString = TE.TaskEither<Error, string>;
 
@@ -25,3 +36,47 @@ export const prompt = async(message: string): Promise<string> =>
 
 export const sleep = async(ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
+
+export const tmpDir = async(prefix?: string): Promise<string> => {
+  const dir = tmpdir();
+  const name = prefix
+    ? `${prefix}-${Crypto.randomBytes(8).toString('hex')}`
+    : '';
+  const path = join(dir, name);
+  await mkdir(path);
+  return path;
+};
+
+const createExtensionDirectoryFromFile = async(
+  file: string,
+): Promise<string> => {
+  const path = await tmpDir('extension');
+
+  fs.createReadStream(file).pipe(unzip.Extract({ path }));
+
+  return path;
+};
+
+const createExtensionDirectoryFromURL = async(url: URL): Promise<string> => {
+  const path = await tmpDir('extension');
+  const res = await fetch(url.href);
+
+  if (!res.body) {
+    throw new Error('no body in response from node-fetch');
+  }
+
+  res.body.pipe(unzip.Extract({ path }));
+
+  return path;
+};
+
+export const createExtensionDirectory = (
+  extensionSource: string,
+): Promise<string> => {
+  try {
+    const url = new URL(extensionSource);
+    return createExtensionDirectoryFromURL(url);
+  } catch (e) {
+    return createExtensionDirectoryFromFile(extensionSource);
+  }
+};
