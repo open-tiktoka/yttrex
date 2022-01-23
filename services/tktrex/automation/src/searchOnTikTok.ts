@@ -6,11 +6,16 @@ import { Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
 import stealth from 'puppeteer-extra-plugin-stealth';
 
+import { loadQueriesCSV } from './loadCSV';
 import loadProfileState from './profileState';
-
 import { ensureLoggedIn } from './tikTokUtil';
-
-import { prompt, setupBrowser, sleep, toError } from './util';
+import {
+  fillInput,
+  prompt,
+  setupBrowser,
+  sleep,
+  toError,
+} from './util';
 
 puppeteer.use(stealth());
 
@@ -52,10 +57,21 @@ export const searchOnTikTok = ({
       await prompt(
         'please install the TikTok extension and press enter once done, or re-run this script',
       );
-      // the other branch of that previous if is handled by the code in createStartPage
+      // the other branch of that previous if is handled by the code in setupBrowser
     }
 
-    await await sleep(60000);
+    const queries = await loadQueriesCSV(file);
+
+    for (const query of queries) {
+      console.log(`searching for "${query}"...`);
+      await fillInput(
+        page,
+        '[data-e2e="search-user-input"',
+        query,
+      );
+      await page.keyboard.press('Enter');
+      await sleep(10000);
+    }
 
     return page;
   }, toError);

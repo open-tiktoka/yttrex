@@ -119,3 +119,15 @@ export const setupBrowser = async({
 
   return await browser.newPage();
 };
+
+export const fillInput = async(page: Page, selector: string, value: string): Promise<Page> => {
+  await page.waitForSelector(selector);
+  await page.focus(selector);
+  await page.keyboard.down('Control');
+  await page.keyboard.press('A');
+  await page.keyboard.up('Control');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.type(value);
+
+  return page;
+};
