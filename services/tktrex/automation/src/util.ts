@@ -2,7 +2,7 @@ import Crypto from 'crypto';
 
 import fs from 'fs';
 
-import { mkdir } from 'fs/promises';
+import { mkdir, stat } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import readline from 'readline';
@@ -48,6 +48,15 @@ export const tmpDir = async(prefix?: string): Promise<string> => {
   return path;
 };
 
+export const fileExists = async(path: string): Promise<boolean> => {
+  try {
+    await stat(path);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 const createExtensionDirectoryFromFile = async(
   file: string,
 ): Promise<string> => {
@@ -90,12 +99,19 @@ export const setupBrowser = async({
   chromePath: string;
   extensionSource: string;
   profile: string;
-}): Promise<Page> => {
-  let extPath: string;
+}): Promise<[Page, string | undefined]> => {
+  let extPath: string | undefined;
+  const extBackupDir = join(profile, 'tx.tt.extension');
+  const extBackupDirExists = await fileExists(extBackupDir);
+
 
   const args = ['--no-sandbox', '--disabled-setuid-sandbox'];
 
-  if (extensionSource !== 'user-provided') {
+  if (extBackupDirExists) {
+    console.log('loading extension from backup dir');
+    args.push(`--load-extension=${extBackupDir}`);
+    args.push(`--disable-extensions-except=${extBackupDir}`);
+  } else if (extensionSource !== 'user-provided') {
     extPath = await createExtensionDirectory(extensionSource);
     args.push(`--load-extension=${extPath}`);
     args.push(`--disable-extensions-except=${extPath}`);
@@ -114,8 +130,9 @@ export const setupBrowser = async({
   };
 
   const browser = await puppeteer.launch(options);
+  const page = await browser.newPage();
 
-  return await browser.newPage();
+  return [page, extPath];
 };
 
 export const fillInput = async(page: Page, selector: string, value: string): Promise<Page> => {

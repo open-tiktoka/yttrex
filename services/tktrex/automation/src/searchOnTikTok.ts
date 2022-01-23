@@ -1,10 +1,14 @@
 /* eslint-disable no-console */
 
+import { join } from 'path';
+
 import * as TE from 'fp-ts/lib/TaskEither';
 
 import { Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
 import stealth from 'puppeteer-extra-plugin-stealth';
+
+import copy from 'recursive-copy';
 
 import { loadQueriesCSV } from './loadCSV';
 import loadProfileState from './profileState';
@@ -40,6 +44,7 @@ export const searchOnTikTok = ({
   url,
 }: SearchOnTikTokOptions): TE.TaskEither<Error, Page> =>
   TE.tryCatch(async() => {
+    const extBackupDir = join(profile, 'tx.tt.extension');
     const profileState = await loadProfileState(profile);
 
     console.log(
@@ -48,7 +53,7 @@ export const searchOnTikTok = ({
       } times before`,
     );
 
-    const page = await setupBrowser({
+    const [page, extDir] = await setupBrowser({
       chromePath,
       extensionSource,
       profile,
@@ -69,6 +74,7 @@ export const searchOnTikTok = ({
 
     for (const query of queries) {
       console.log(`searching for "${query}"...`);
+
       await fillInput(
         page,
         '[data-e2e="search-user-input"',
@@ -77,6 +83,10 @@ export const searchOnTikTok = ({
       await page.keyboard.press('Enter');
       await handleCaptcha(page);
       await sleep(5000);
+    }
+
+    if (extDir) {
+      await copy(extDir, extBackupDir);
     }
 
     return page;
