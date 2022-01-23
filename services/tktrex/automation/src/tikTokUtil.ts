@@ -43,3 +43,37 @@ export const ensureLoggedIn = async(page: Page): Promise<true> => {
 
   return true;
 };
+
+/**
+ * Checks if a captcha is present on the page, if so,
+ * wait until it is not present anymore (and ask user to solve it).
+ */
+export const handleCaptcha = async(
+  page: Page,
+): Promise<void> => {
+  try {
+    await page.waitForSelector('#captcha-verify-image', {
+      visible: true,
+      timeout: 5000,
+    });
+
+    console.log('captcha detected, please solve it');
+
+    for (;;) {
+      try {
+        await page.waitForSelector('#captcha-verify-image', {
+          visible: true,
+          timeout: 5000,
+        });
+
+        console.log('waiting for captcha to disappear...');
+        await sleep(5000);
+      } catch (err) {
+        console.log('thanks for solving the captcha');
+        break;
+      }
+    }
+  } catch (err) {
+    // ignore
+  }
+};

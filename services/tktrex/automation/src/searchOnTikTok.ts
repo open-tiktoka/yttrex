@@ -8,7 +8,12 @@ import stealth from 'puppeteer-extra-plugin-stealth';
 
 import { loadQueriesCSV } from './loadCSV';
 import loadProfileState from './profileState';
-import { ensureLoggedIn } from './tikTokUtil';
+
+import {
+  ensureLoggedIn,
+  handleCaptcha,
+} from './tikTokUtil';
+
 import {
   fillInput,
   prompt,
@@ -50,7 +55,7 @@ export const searchOnTikTok = ({
     });
 
     await page.goto(url);
-
+    await handleCaptcha(page);
     await ensureLoggedIn(page);
 
     if (extensionSource === 'user-provided') {
@@ -70,7 +75,8 @@ export const searchOnTikTok = ({
         query,
       );
       await page.keyboard.press('Enter');
-      await sleep(10000);
+      await handleCaptcha(page);
+      await sleep(5000);
     }
 
     return page;
