@@ -1,9 +1,12 @@
+/* eslint-disable no-console */
 import { Page } from 'puppeteer';
 
 import { sleep } from './util';
 
-export const isLoggedIn = async(page: Page): Promise<boolean> => {
-  const timeout = 5000;
+export const isLoggedIn = async(
+  page: Page,
+  timeout = 5000,
+): Promise<boolean> => {
   try {
     const now = Date.now();
 
@@ -28,4 +31,15 @@ export const isLoggedIn = async(page: Page): Promise<boolean> => {
     // the TikTok logo is visible
     return page.$('[data-e2e="tiktok-logo"') !== null;
   }
+};
+
+export const ensureLoggedIn = async(page: Page): Promise<true> => {
+  let loggedIn = await isLoggedIn(page);
+
+  while (!loggedIn) {
+    console.log('please log in to TikTok');
+    loggedIn = await isLoggedIn(page);
+  }
+
+  return true;
 };

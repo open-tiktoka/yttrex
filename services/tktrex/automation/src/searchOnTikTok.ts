@@ -8,9 +8,9 @@ import stealth from 'puppeteer-extra-plugin-stealth';
 
 import loadProfileState from './profileState';
 
-import { isLoggedIn } from './tikTokUtil';
+import { ensureLoggedIn } from './tikTokUtil';
 
-import { createExtensionDirectory, prompt, sleep, toError } from './util';
+import { prompt, setupBrowser, sleep, toError } from './util';
 
 puppeteer.use(stealth());
 
@@ -38,50 +38,24 @@ export const searchOnTikTok = ({
       } times before`,
     );
 
-    const extArgs =
-      extensionSource === 'user-provided'
-        ? []
-        : await (async() => {
-          const extPath = await createExtensionDirectory(extensionSource);
-          console.log(`extension path: ${extPath}`);
+    const page = await setupBrowser({
+      chromePath,
+      extensionSource,
+      profile,
+    });
 
-          return [
-            `--load-extension=${extPath}`,
-            `--disable-extensions-except=${extPath}`,
-          ];
-        })();
-
-    const options = {
-      args: ['--no-sandbox', '--disabled-setuid-sandbox', ...extArgs],
-      defaultViewport: {
-        height: 1080,
-        width: 1920,
-      },
-      executablePath: chromePath,
-      headless: false,
-      ignoreDefaultArgs: ['--disable-extensions'],
-      userDataDir: profile,
-    };
-
-    const browser = await puppeteer.launch(options);
-
-    const page = await browser.newPage();
     await page.goto(url);
 
-    let loggedIn = await isLoggedIn(page);
+    await ensureLoggedIn(page);
 
     if (extensionSource === 'user-provided') {
       await prompt(
-        'please install the TikTok extension and press enter when done',
+        'please install the TikTok extension and press enter once done, or re-run this script',
       );
+      // the other branch of that previous if is handled by the code in createStartPage
     }
 
-    while (!loggedIn) {
-      console.log('please log in to TikTok');
-      loggedIn = await isLoggedIn(page);
-    }
-
-    await sleep(60000);
+    await await sleep(60000);
 
     return page;
   }, toError);

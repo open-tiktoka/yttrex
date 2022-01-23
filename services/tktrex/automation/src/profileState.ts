@@ -8,14 +8,14 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 
 const ProfileStateStorage = t.type(
   {
-    nTimesUsed: t.number,
+    nTimesAccessed: t.number,
   },
   'ProfileStateStorage',
 );
 type ProfileStateStorage = t.TypeOf<typeof ProfileStateStorage>;
 
 const initialProfileState: ProfileStateStorage = {
-  nTimesUsed: 0,
+  nTimesAccessed: 0,
 };
 
 export class ProfileState {
@@ -23,11 +23,11 @@ export class ProfileState {
     private readonly path: string,
     private readonly storage: ProfileStateStorage,
   ) {
-    this.storage.nTimesUsed += 1;
+    this.storage.nTimesAccessed += 1;
   }
 
   getNTimesUsed(): number {
-    return this.storage.nTimesUsed;
+    return this.storage.nTimesAccessed;
   }
 
   public async save(): Promise<ProfileState> {

@@ -11,6 +11,7 @@ import { URL } from 'url';
 import * as TE from 'fp-ts/lib/TaskEither';
 
 import fetch from 'node-fetch';
+import puppeteer, { Page } from 'puppeteer';
 import unzip from 'unzipper';
 
 export type TEString = TE.TaskEither<Error, string>;
@@ -79,4 +80,42 @@ export const createExtensionDirectory = (
   } catch (e) {
     return createExtensionDirectoryFromFile(extensionSource);
   }
+};
+
+export const setupBrowser = async({
+  chromePath,
+  extensionSource,
+  profile,
+}: {
+  chromePath: string;
+  extensionSource: string;
+  profile: string;
+}): Promise<Page> => {
+  const extArgs =
+    extensionSource === 'user-provided'
+      ? []
+      : await (async() => {
+        const extPath = await createExtensionDirectory(extensionSource);
+
+        return [
+          `--load-extension=${extPath}`,
+          `--disable-extensions-except=${extPath}`,
+        ];
+      })();
+
+  const options = {
+    args: ['--no-sandbox', '--disabled-setuid-sandbox', ...extArgs],
+    defaultViewport: {
+      height: 1080,
+      width: 1920,
+    },
+    executablePath: chromePath,
+    headless: false,
+    ignoreDefaultArgs: ['--disable-extensions'],
+    userDataDir: profile,
+  };
+
+  const browser = await puppeteer.launch(options);
+
+  return await browser.newPage();
 };
