@@ -91,20 +91,18 @@ export const setupBrowser = async({
   extensionSource: string;
   profile: string;
 }): Promise<Page> => {
-  const extArgs =
-    extensionSource === 'user-provided'
-      ? []
-      : await (async() => {
-        const extPath = await createExtensionDirectory(extensionSource);
+  let extPath: string;
 
-        return [
-          `--load-extension=${extPath}`,
-          `--disable-extensions-except=${extPath}`,
-        ];
-      })();
+  const args = ['--no-sandbox', '--disabled-setuid-sandbox'];
+
+  if (extensionSource !== 'user-provided') {
+    extPath = await createExtensionDirectory(extensionSource);
+    args.push(`--load-extension=${extPath}`);
+    args.push(`--disable-extensions-except=${extPath}`);
+  }
 
   const options = {
-    args: ['--no-sandbox', '--disabled-setuid-sandbox', ...extArgs],
+    args,
     defaultViewport: {
       height: 1080,
       width: 1920,
