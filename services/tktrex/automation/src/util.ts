@@ -134,6 +134,21 @@ export const setupBrowser = async({
   return [page, extPath];
 };
 
+export const typeLikeAHuman = async(page: Page, text: string): Promise<Page> => {
+  const averageWordsPerMinute = 60;
+  const averageCharactersPerWord = 5;
+
+  const humanDurationMs = (text.length / averageCharactersPerWord) / averageWordsPerMinute * 60 * 1000;
+  const letterDurationMs = humanDurationMs / text.length;
+
+  for (const letter of text) {
+    await page.keyboard.type(letter);
+    await sleep(letterDurationMs * (0.6 + Math.random() * 0.8));
+  }
+
+  return page;
+};
+
 export const fillInput = async(page: Page, selector: string, value: string): Promise<Page> => {
   await page.waitForSelector(selector);
   await page.focus(selector);
@@ -141,7 +156,7 @@ export const fillInput = async(page: Page, selector: string, value: string): Pro
   await page.keyboard.press('A');
   await page.keyboard.up('Control');
   await page.keyboard.press('Backspace');
-  await page.keyboard.type(value);
+  await typeLikeAHuman(page, value);
 
   return page;
 };
