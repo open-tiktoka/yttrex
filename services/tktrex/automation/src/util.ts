@@ -108,7 +108,6 @@ export const setupBrowser = async({
   const args = ['--no-sandbox', '--disabled-setuid-sandbox'];
 
   if (extBackupDirExists) {
-    console.log('loading extension from backup dir');
     args.push(`--load-extension=${extBackupDir}`);
     args.push(`--disable-extensions-except=${extBackupDir}`);
   } else if (extensionSource !== 'user-provided') {
