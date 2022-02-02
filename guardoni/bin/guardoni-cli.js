@@ -34,6 +34,11 @@ const runGuardoni = ({
 
 yargs(hideBin(process.argv))
   .scriptName('guardoni-cli')
+  .check((argv, options) => {
+    if(argv?.backend && !_.endsWith(argv.backend, '/api'))
+      throw new Error("--backend should end with /api, consult the online documentation!");
+    return true // tell Yargs that the arguments passed the check
+  })
   .command(
     'experiment <experiment>',
     'Run guardoni from a given experiment',

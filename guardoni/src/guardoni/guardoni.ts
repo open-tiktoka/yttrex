@@ -273,6 +273,10 @@ export const guardoniExecution =
         ctx.logger.debug(
           `Operations completed in %ds: check results at `,
           duration,
+          // this is  bug, is not the backend with /api serving the website,
+          // we can of course point to an API endpoint, but the result would be
+          // a JSON at best. or we can return youtube.tracking.exposed only 
+          // if the default backend have been used.
           `${ctx.config.backend}/${
             directiveType === 'chiaroscuro' ? 'shadowban' : 'experiments'
           }/render/#${experiment}`
