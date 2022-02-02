@@ -1,10 +1,100 @@
 const _ = require('lodash');
 const debug = require('debug')('routes:directives');
+const moment = require('moment');
 
 const automo = require('../lib/automo');
 const utils = require('../lib/utils');
 const mongo3 = require('../lib/mongo3');
 const nconf = require('nconf');
+const security = require('../lib/security');
+
+async function list(req) {
+  /* this function pull from the collection "directives"
+     and filter by returning only the 'comparison' kind of
+     experiment. This is going to change as only 'comparison' would exist. */
+
+  const type = req.params.directiveType;
+
+  if (['comparison', 'chiaroscuro'].indexOf(type) === -1)
+    return { text: 'Directive Type not supported! ' };
+
+  if (type === 'comparison') {
+    /* this kind of directive require password for listing, instead the shadowban/chiaroscuro at the moment is free access */
+    if (!security.checkPassword(req)) return { status: 403 };
+  }
+
+  /* default query params for Taboule,
+       they might be moved in a proper lib function */
+  const DEFAULT_AMOUNT = 50;
+  const amount = req.query.amount
+    ? _.parseInt(req.query.amount)
+    : DEFAULT_AMOUNT;
+  const skip = req.query.skip ? _.parseInt(req.query.skip) : 0;
+  const options = { amount, skip };
+
+  const filter = { directiveType: type };
+  const mongoc = await mongo3.clientConnect({ concurrency: 1 });
+
+  const configured = await mongo3.readLimit(
+    mongoc,
+    nconf.get('schema').directives,
+    filter,
+    { when: -1 },
+    options.amount,
+    options.skip
+  );
+  /*
+    const expIdList = _.map(configured, 'experimentId');
+    const lastweek = await mongo3
+        .readLimit(mongoc, nconf.get('schema').metadata, {
+            "experiment.experimentId": { "$in": expIdList }
+        }, { savingTime: -1}, options.amount, options.skip);
+*/
+
+  const total = await mongo3.count(
+    mongoc,
+    nconf.get('schema').directives,
+    filter
+  );
+
+  await mongoc.close();
+
+  const c = _.map(configured, function (r) {
+    r.humanizedWhen = moment(r.when).format('YYYY-MM-DD');
+    return _.omit(r, ['_id', 'directiveType']);
+  });
+
+  /*
+    recent = _.reduce(_.groupBy(_.map(lastweek, function(e) {
+         return {
+             publicKey: e.publicKey.substr(0, 8),
+             evidencetag: e.experiment.evidencetag,
+             experimentId: e.experiment.experimentId
+         }
+    }), 'experimentId'), function(memo, listOf, experimentId) {
+        memo[experimentId] = {
+            contributions: _.countBy(listOf, 'evidencetag'),
+            profiles: _.countBy(listOf, 'publicKey')
+        };
+        return memo;
+    }, {});
+
+    debug("Directives found: %d configured %d active %d recent (type %s, max %d)",
+        infos.configured.length, infos.active.length,
+        infos.recent.length, type, MAX);
+*/
+
+  /* result for Taboule need to fit a standard format */
+  const taboulefmt = {
+    pagination: options,
+    content: _.take(c, options.amount),
+    total,
+  };
+
+  return {
+    json: taboulefmt,
+  };
+}
 
 function reproducibleTypo(title) {
   const trimmedT = title.replace(/.$/, '').replace(/^./, '');
@@ -143,6 +233,11 @@ async function get(req) {
   debug('GET: should return directives for %s', experimentId);
   const expinfo = await automo.pickDirective(experimentId);
 
+  if (!expinfo) {
+    debug('Directive fetching has failed: experimentId not found!');
+    return { text: 'Invalid experimentId: not found!' };
+  }
+
   if (expinfo.directiveType === 'chiaroscuro') {
     const directives = _.flatten(
       _.map(expinfo.links, function (vidblock, counter) {
@@ -162,7 +257,7 @@ async function get(req) {
 async function getPublic(req) {
   const whiteList = [
     // 'b3d531eca62b2dc989926e0fe21b54ab988b7f3d',
-    // prod ids
+    // these ID should be collected in a proper JSON file with description
     'd75f9eaf465d2cd555de65eaf61a770c82d59451',
     '37384a9b7dff26184cdea226ad5666ca8cbbf456',
   ];
@@ -193,6 +288,7 @@ async function getPublic(req) {
 }
 
 module.exports = {
+  list,
   chiaroScuro,
   comparison,
   post,

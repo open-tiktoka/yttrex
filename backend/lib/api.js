@@ -51,12 +51,16 @@ const apiList = {
   getMonitor: require('../routes/monitor').getMonitor,
   deleter: require('../routes/monitor').deleter,
 
+  /* v3 guardoni support */
+  postDirective: require('../routes/directives').post,
+  fetchDirective: require('../routes/directives').get,
+  getPublicDirectives: require('../routes/directives').getPublic,
+  getAllExperiments: require('../routes/directives').list,
+
   /* guardoni support for webapp */
-  getAllExperiments: require('../routes/experiments').list,
   experimentCSV: require('../routes/experiments').csv,
   experimentDOT: require('../routes/experiments').dot,
   experimentJSON: require('../routes/experiments').json,
-  experimentEmergencyCSV: require('../routes/experiments').emergency,
   // used from extension
   experimentChannel3: require('../routes/experiments').channel3,
   // used by guardoni to close it
@@ -88,11 +92,6 @@ const apiList = {
   creatorDelete: require('../routes/youchoose').creatorDelete,
   /* v3 opendata */
   opendataChannel: require('../routes/opendata').opendataChannel,
-
-  /* v3 chiaroscuro support */
-  postDirective: require('../routes/directives').post,
-  fetchDirective: require('../routes/directives').get,
-  getPublicDirectives: require('../routes/directives').getPublic,
 
   /* advertising support */
   adsPerVideo: require('../routes/ads').perVideo,

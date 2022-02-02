@@ -69,7 +69,7 @@ const iowrapper =
       res.status(502);
       res.send('Software error: ' + error.message);
       loginc('errors', fname);
-      logger.debug('Error in HTTP handler API(%s): %o', fname, error);
+      logger.debug('Error in HTTP handler API(%s): %s', fname, error);
     }
     res.end();
   };
