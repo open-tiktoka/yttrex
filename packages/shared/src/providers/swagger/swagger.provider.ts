@@ -15,7 +15,7 @@ import {
   MinimalEndpoint,
   MinimalEndpointInstance,
 } from 'ts-endpoint/lib/helpers';
-import { getOpenAPISchema, HasOpenAPISchema } from './IOTSToOpenAPISchema';
+import { getOpenAPISchema, IOTOpenDocSchema } from './IOTSToOpenAPISchema';
 
 interface ServerConfig {
   protocol: 'http' | 'https';
@@ -24,7 +24,7 @@ interface ServerConfig {
   basePath: string;
 }
 
-interface DocConfig {
+export interface DocConfig {
   title: string;
   description: string;
   version: string;
@@ -39,7 +39,7 @@ interface DocConfig {
     };
   };
   models: {
-    [key: string]: HasOpenAPISchema;
+    [key: string]: IOTOpenDocSchema;
   };
   server: ServerConfig;
   components: {
@@ -65,6 +65,17 @@ const hasRequestBody = <E extends MinimalEndpoint>(e: E): boolean => {
     (e.Method === 'POST' || e.Method === 'PUT' || e.Method === 'PATCH') &&
     (e.Input as any)?.Body !== undefined
   );
+};
+
+const getInnerSchemaName = (tt: string): string => {
+  if (tt.startsWith('Array<')) {
+    // console.log(tt);
+    const innerName = tt.replace('Array<', '').replace('>', '');
+    // console.log('inner name', innerName);
+    return innerName;
+  }
+
+  return tt;
 };
 
 /**
@@ -124,16 +135,15 @@ const apiSchemaFromEndpoint = (
   // derive path parameters from io-ts definition of e.Input.Params
   const pathParameters =
     Params !== undefined
-      ? R.keys(Params.props).reduce<any[]>(
-          (acc, k) =>
-            acc.concat({
-              name: k,
-              in: 'path',
-              required: true,
-              schema: getOpenAPISchema((Params?.props)[k]),
-            }),
-          []
-        )
+      ? R.keys(Params.props).reduce<any[]>((acc, k) => {
+          const { required, ...schema } = getOpenAPISchema((Params?.props)[k]);
+          return acc.concat({
+            name: k,
+            in: 'path',
+            required: true,
+            schema,
+          });
+        }, [])
       : [];
 
   // combine all parameters
@@ -147,24 +157,30 @@ const apiSchemaFromEndpoint = (
   // add definition of request body, if needed
   const requestBody = hasRequestBody(e)
     ? {
-        content: {
-          'application/json': {
-            schema: {
-              $ref: `#/components/schemas/${(input as any).Body.name}`,
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                $ref: `#/components/schemas/${getInnerSchemaName(
+                  (e.Input?.Body as any)?.name
+                )}`,
+              },
             },
           },
         },
       }
     : {};
 
+  const schemaName = getInnerSchemaName((e.Output as any).name);
+
   // define success response
   const successResponse = {
     [responseStatusCode]: {
-      description: (e.Output as any).name,
+      description: schemaName,
       content: {
         'application/json': {
           schema: {
-            $ref: `#/components/schemas/${(e.Output as any).name}`,
+            $ref: `#/components/schemas/${schemaName}`,
           },
         },
       },
@@ -173,13 +189,21 @@ const apiSchemaFromEndpoint = (
 
   // TODO: define error response
 
+  const hasDocumentationMethod = (e as any).getDocumentation !== undefined;
+  const description = hasDocumentationMethod
+    ? (e as any).getDocumentation()
+    : `${e.Method}: ${path}`;
+
+  // eslint-disable-next-line
+  // console.log(schemaName, { hasDocumentationMethod, description });
+
   return {
-    summary: key,
-    description: `${e.Method} ${path}`,
+    summary: (e as any).title ?? key,
+    description,
     tags: tags,
     parameters,
     security,
-    requestBody,
+    ...requestBody,
     responses: {
       ...successResponse,
     },
@@ -220,14 +244,18 @@ const getPaths = (
                     const currentEndpointSchema = apiSchemaFromEndpoint(
                       key,
                       endpoint,
-                      [`${versionKey} - ${scopeKey}`]
+                      (endpoint as any).tags ?? [
+                        'all',
+                        // `${versionKey} - ${scopeKey}`
+                      ]
                     );
 
-                    const currentSchema = {
-                      [(endpoint.Output as any).name]: getOpenAPISchema(
-                        endpoint.Output as any
-                      ),
-                    };
+                    const currentSchema = (endpoint.Output as any)?.name
+                      ? {
+                          [getInnerSchemaName((endpoint.Output as any).name)]:
+                            getOpenAPISchema(endpoint.Output as any),
+                        }
+                      : {};
 
                     return {
                       schemas: {
@@ -273,10 +301,37 @@ export const generateDoc = (config: DocConfig): any => {
 
   const modelSchema = pipe(
     config.models,
-    R.reduceWithIndex(S.Ord)({}, (key, acc, model) => ({
-      ...acc,
-      [model.name]: getOpenAPISchema(model),
-    }))
+    R.reduceWithIndex(S.Ord)(
+      {
+        any: {
+          type: 'object',
+          description: 'any value',
+        },
+        string: {
+          type: 'string',
+          description: 'A string value',
+        },
+        url: {
+          type: 'string',
+          description: 'A valid URL',
+        },
+        boolean: {
+          type: 'boolean',
+          description: 'A `true | false` value',
+        },
+      },
+      (key, acc, model) => {
+        const { required, ...modelSchema } = getOpenAPISchema(model);
+        if (model.name) {
+          return {
+            ...acc,
+            [getInnerSchemaName(model.name)]: modelSchema,
+          };
+        }
+
+        return acc;
+      }
+    )
   );
   return {
     openapi: '3.0.3',
@@ -287,13 +342,14 @@ export const generateDoc = (config: DocConfig): any => {
     },
     servers: [
       {
-        url: `{protocol}://{host}:{port}/{basePath}`,
+        url: `{protocol}://{host}{port}/{basePath}`,
         description: 'Node Server',
         variables: {
           protocol: { default: config.server.protocol },
           host: { default: config.server.host },
           port: {
             default: config.server.port,
+            enum: [config.server.port, '443'],
           },
           basePath: {
             default: config.server.basePath,
