@@ -1,9 +1,6 @@
-import React, {
-  useState,
-  useEffect,
-} from 'react';
+import React, { useState, useEffect } from 'react';
 
-import moment from 'moment';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 
 import { Card } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
@@ -42,7 +39,7 @@ const Popup: React.FC = () => {
     ? Date.now() - new Date(config.BUILDISODATE).getTime()
     : 0;
 
-  const timeAgo = moment.duration(deltaMs).humanize();
+  const timeAgo = formatDistanceToNow(new Date(deltaMs));
 
   if (status === 'loading') {
     return (
@@ -76,7 +73,9 @@ const Popup: React.FC = () => {
         <FormHelperText>About</FormHelperText>
         <InfoBox />
       </Card>
-      <small>version {config.VERSION}, released {timeAgo} ago</small>
+      <small>
+        version {config.VERSION}, released {timeAgo} ago
+      </small>
     </div>
   );
 };
