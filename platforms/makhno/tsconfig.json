@@ -1,0 +1,34 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "strict": false,
+    "rootDir": "./",
+    "baseUrl": "./",
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@shared/*": ["../../packages/shared/src/*"],
+      "@yttrex/*": ["../yttrex/backend/*"]
+    }
+  },
+  "include": [
+    "./bin",
+    "./routes"
+  ],
+  "exclude": ["./tests"],
+  "watchOptions": {
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "synchronousWatchDirectory": true
+  },
+  "references": [
+    {
+      "path": "../../packages/shared"
+    },
+    {
+      "path": "../yttrex/backend"
+    }
+  ]
+}
