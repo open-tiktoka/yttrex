@@ -1,3 +1,4 @@
+import { StringOrNull } from '@shared/models/common/StringOrNull';
 import * as t from 'io-ts';
 import { date } from 'io-ts-types/lib/date';
 import { HomeType, SearchType, VideoType } from './Ad';
@@ -7,8 +8,8 @@ export const ParsedInfo = t.intersection(
     t.strict(
       {
         index: t.number,
-        label: t.union([t.string, t.null]),
-        recommendedSource: t.union([t.string, t.null]),
+        label: StringOrNull,
+        recommendedSource: StringOrNull,
         elems: t.union([t.number, t.undefined]),
         videoId: t.string,
         timePrecision: t.string,
@@ -20,11 +21,11 @@ export const ParsedInfo = t.intersection(
       {
         isLive: t.boolean,
         verified: t.union([t.boolean, t.null]),
-        foryou: t.union([t.string, t.null]),
+        foryou: StringOrNull,
         params: t.union([t.record(t.string, t.string), t.null]),
         recommendedTitle: t.string,
         recommendedLength: t.number,
-        recommendedDisplayL: t.union([t.string, t.null]),
+        recommendedDisplayL: StringOrNull,
         // moment duration as string
         recommendedPubTime: t.union([t.any, t.null]),
         // recommendedRelativeSeconds: t.union([t.number, t.null]),
@@ -45,7 +46,7 @@ const MetadataBase = t.strict(
     savingTime: date,
     clientTime: t.union([date, t.undefined]),
     href: t.string,
-    blang: t.union([t.string, t.null]),
+    blang: StringOrNull,
   },
   'MetadataBase'
 );
